@@ -14,7 +14,11 @@ export interface HealthcheckOptions {
   title: string;
 }
 
-const healthcheck: FastifyPluginCallback<HealthcheckOptions> = (fastify, opts, next) => {
+const healthcheck: FastifyPluginCallback<HealthcheckOptions> = (
+  fastify,
+  opts,
+  next
+) => {
   fastify.get<{ Reply: Static<typeof HelloWorld> }>(
     '/',
     {
@@ -49,7 +53,7 @@ export default (opts: ApiOptions) => {
     swagger: {
       info: {
         title: opts.title,
-        description: 'hello',
+        description: 'Media Function to trim ABR files',
         version: 'v1'
       }
     }

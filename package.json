@@ -21,7 +21,7 @@
     "@fastify/swagger-ui": "^1.5.0",
     "@fastify/type-provider-typebox": "^4.0.0",
     "@sinclair/typebox": "^0.32.8",
-    "fastify": "^4.23.2",
+    "fastify": "4.23.2",
     "nodemon": "^2.0.20",
     "ts-node": "^10.9.1"
   },

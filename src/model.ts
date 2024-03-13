@@ -44,6 +44,7 @@ export type TrimJobStatus = Static<typeof TrimJobStatus>;
 export const TrimJob = Type.Object({
   id: Type.String({ description: 'ID of the trim job' }),
   edl: EDL,
+  outputFiles: Type.Array(Type.String({ description: 'path to output file' })),
   status: TrimJobStatus
 });
 export type TrimJob = Static<typeof TrimJob>;

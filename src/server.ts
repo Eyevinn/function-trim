@@ -1,6 +1,9 @@
 import api from './api';
 
-const server = api({ title: 'Media Function Trim' });
+const server = api({
+  title: 'Media Function Trim',
+  ffmpegPath: process.env.FFMPEG_PATH || '/usr/bin/ffmpeg'
+});
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8000;
 

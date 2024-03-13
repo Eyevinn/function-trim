@@ -5,6 +5,7 @@ import swaggerUI from '@fastify/swagger-ui';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { Static, Type } from '@sinclair/typebox';
 import { FastifyPluginCallback } from 'fastify';
+import apiTrim from './api_trim';
 
 const HelloWorld = Type.String({
   description: 'The magical words!'
@@ -38,6 +39,7 @@ const healthcheck: FastifyPluginCallback<HealthcheckOptions> = (
 
 export interface ApiOptions {
   title: string;
+  ffmpegPath: string;
 }
 
 export default (opts: ApiOptions) => {
@@ -65,5 +67,6 @@ export default (opts: ApiOptions) => {
   api.register(healthcheck, { title: opts.title });
   // register other API routes here
 
+  api.register(apiTrim, { ffmpegPath: opts.ffmpegPath });
   return api;
 };

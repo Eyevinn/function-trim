@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
+import { Readable } from 'stream';
 
 const StringEnum = <T extends string[]>(values: [...T]) =>
   Type.Unsafe<T[number]>({
@@ -48,3 +49,19 @@ export const TrimJob = Type.Object({
   status: TrimJobStatus
 });
 export type TrimJob = Static<typeof TrimJob>;
+
+export type S3Content =
+  | string
+  | Readable
+  | ReadableStream
+  | Blob
+  | Uint8Array
+  | Buffer
+  | undefined;
+
+export type UploadToS3 = {
+  content: S3Content;
+  bucket: string;
+  key: string;
+  region?: string;
+};

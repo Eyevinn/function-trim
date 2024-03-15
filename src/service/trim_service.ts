@@ -83,7 +83,7 @@ export default class TrimService {
     if (props.sourceType === 'single') {
       return this.trimSingle(props);
     } else {
-      return this.trimMultiple(props);
+      return this.trimABR(props);
     }
   }
 
@@ -109,7 +109,7 @@ export default class TrimService {
       })
       .join('');
 
-    const outputName = `${props.edl.name}.mp4`;
+    const outputName = path.join(__dirname, `${props.edl.name}.mp4`);
     const process = spawn('ffmpeg', [
       ...props.source.flatMap((source) => {
         if (isS3URI(source)) {
@@ -142,17 +142,15 @@ export default class TrimService {
       process.on('error', reject);
     });
 
-    const filePath = path.join(__dirname, outputName);
-
-    const stream = fs.createReadStream(filePath);
+    const stream = fs.createReadStream(outputName);
     await uploadToS3({
       content: stream,
       bucket: props.outputDirectory,
-      key: outputName
+      key: `${props.edl.name}.mp4`
     });
     try {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted ${filePath}`);
+      fs.unlinkSync(outputName);
+      console.log(`Deleted ${outputName}`);
     } catch (error) {
       console.error(error);
       this.state = 'cancelled';
@@ -166,7 +164,7 @@ export default class TrimService {
     return this.outputFiles;
   }
 
-  async trimMultiple(props: NewTrimJobRequest) {
+  async trimABR(props: NewTrimJobRequest) {
     this.state = 'running';
     await Promise.all(
       props.source.map((source) => this.downloadS3File(source))
@@ -185,7 +183,10 @@ export default class TrimService {
         })
         .join('');
 
-      const outputName = `${props.edl.name}_${sourceIndex}.mp4`;
+      const outputName = path.join(
+        __dirname,
+        `${props.edl.name}_${sourceIndex}.mp4`
+      );
 
       let localPath = source;
       if (isS3URI(source)) {
@@ -212,16 +213,15 @@ export default class TrimService {
         process.on('error', reject);
       });
 
-      const filePath = path.join(__dirname, outputName);
-      const stream = fs.createReadStream(filePath);
+      const stream = fs.createReadStream(outputName);
       await uploadToS3({
         content: stream,
         bucket: props.outputDirectory,
-        key: outputName
+        key: `${props.edl.name}_${sourceIndex}.mp4`
       });
       try {
-        fs.unlinkSync(filePath);
-        console.log(`Deleted ${filePath}`);
+        fs.unlinkSync(outputName);
+        console.log(`Deleted ${outputName}`);
       } catch (error) {
         console.error(error);
         this.state = 'cancelled';

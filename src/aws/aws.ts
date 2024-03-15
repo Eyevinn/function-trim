@@ -2,22 +2,7 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { Readable } from 'stream';
 import fs from 'fs';
-
-export type TContent =
-  | string
-  | Readable
-  | ReadableStream
-  | Blob
-  | Uint8Array
-  | Buffer
-  | undefined;
-
-export type TUploadToS3 = {
-  content: TContent;
-  bucket: string;
-  key: string;
-  region?: string;
-};
+import { UploadToS3 } from '../model';
 
 export const S3_FOLDER = 'aws_content';
 
@@ -66,7 +51,7 @@ export async function uploadToS3({
   content,
   bucket,
   key
-}: TUploadToS3): Promise<void> {
+}: UploadToS3): Promise<void> {
   const client = new S3Client({ region: process.env.AWS_REGION });
   const upload = new Upload({
     client,

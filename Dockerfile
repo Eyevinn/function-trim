@@ -13,8 +13,8 @@ COPY --chown=node:node ["src", "./src"]
 RUN npm pkg delete scripts.prepare \
     && npm ci --omit=dev
 USER root
-RUN apk update
-RUN apk add
-RUN apk add ffmpeg
+RUN apk update && \
+    apk upgrade && \
+    apk add ffmpeg
 COPY . .
 CMD [ "npm", "run", "start" ]

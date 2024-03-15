@@ -1,4 +1,7 @@
 import api from './api';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: __dirname + '/.env' });
 
 const server = api({
   title: 'Media Function Trim',

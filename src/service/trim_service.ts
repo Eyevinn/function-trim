@@ -51,17 +51,21 @@ export default class TrimService {
   }
 
   downloadS3File(url: string) {
-    if (!fs.existsSync(S3_FOLDER)) {
-      fs.mkdirSync(S3_FOLDER);
+    if (!fs.existsSync(path.join(__dirname, S3_FOLDER))) {
+      fs.mkdirSync(path.join(__dirname, S3_FOLDER));
     }
     if (!isS3URI(url)) return;
     downloadFromS3(url);
   }
 
   deleteAWSCache() {
-    const files = fs.readdirSync(S3_FOLDER);
-    for (const file of files) {
-      fs.unlinkSync(path.join(S3_FOLDER, file));
+    try {
+      const files = fs.readdirSync(path.join(__dirname, S3_FOLDER));
+      for (const file of files) {
+        fs.unlinkSync(path.join(__dirname, S3_FOLDER, file));
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -114,7 +118,7 @@ export default class TrimService {
       ...props.source.flatMap((source) => {
         if (isS3URI(source)) {
           const s3Key = getFileNameFromS3URL(source);
-          const localPath = path.join(S3_FOLDER, s3Key);
+          const localPath = path.join(__dirname, S3_FOLDER, s3Key);
           return ['-i', localPath];
         } else {
           return ['-i', source];
@@ -142,19 +146,26 @@ export default class TrimService {
       process.on('error', reject);
     });
 
-    const stream = fs.createReadStream(outputName);
-    await uploadToS3({
-      content: stream,
-      bucket: props.outputDirectory,
-      key: `${props.edl.name}.mp4`
-    });
     try {
-      fs.unlinkSync(outputName);
-      console.log(`Deleted ${outputName}`);
+      await uploadToS3({
+        path: outputName,
+        bucket: props.outputDirectory,
+        key: `${props.edl.name}.mp4`
+      });
     } catch (error) {
       console.error(error);
       this.state = 'cancelled';
+    }
+    try {
+      if (fs.existsSync(outputName)) {
+        fs.unlinkSync(outputName);
+        console.log(`Deleted ${outputName}`);
+      }
+    } catch (error) {
+      console.error('Error while deleting file', error);
+      this.state = 'cancelled';
       this.currentJob = undefined;
+      this.deleteAWSCache();
       return [];
     }
 
@@ -191,7 +202,7 @@ export default class TrimService {
       let localPath = source;
       if (isS3URI(source)) {
         const s3Key = getFileNameFromS3URL(source);
-        localPath = path.join(S3_FOLDER, s3Key);
+        localPath = path.join(__dirname, S3_FOLDER, s3Key);
       }
       const process = spawn('ffmpeg', [
         '-i',
@@ -213,19 +224,27 @@ export default class TrimService {
         process.on('error', reject);
       });
 
-      const stream = fs.createReadStream(outputName);
-      await uploadToS3({
-        content: stream,
-        bucket: props.outputDirectory,
-        key: `${props.edl.name}_${sourceIndex}.mp4`
-      });
       try {
-        fs.unlinkSync(outputName);
+        await uploadToS3({
+          path: outputName,
+          bucket: props.outputDirectory,
+          key: `${props.edl.name}_${sourceIndex}.mp4`
+        });
+      } catch (error) {
+        console.error(error);
+        this.state = 'cancelled';
+      }
+      try {
+        if (fs.existsSync(outputName)) {
+          fs.unlinkSync(outputName);
+          console.log(`Deleted ${outputName}`);
+        }
         console.log(`Deleted ${outputName}`);
       } catch (error) {
         console.error(error);
         this.state = 'cancelled';
         this.currentJob = undefined;
+        this.deleteAWSCache();
         return '';
       }
       return `s3://${props.outputDirectory}/${outputName}`;

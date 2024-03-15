@@ -50,17 +50,8 @@ export const TrimJob = Type.Object({
 });
 export type TrimJob = Static<typeof TrimJob>;
 
-export type S3Content =
-  | string
-  | Readable
-  | ReadableStream
-  | Blob
-  | Uint8Array
-  | Buffer
-  | undefined;
-
 export type UploadToS3 = {
-  content: S3Content;
+  path: string;
   bucket: string;
   key: string;
   region?: string;

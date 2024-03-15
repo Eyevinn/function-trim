@@ -1,19 +1,50 @@
-# {{Name}}
+# Function Trim
 
-<!--
+## Setup
 
-## Requirements
-Add any external project dependencies such as node.js version etc here
+### Requirements
+
+The following environment variables can be set:
+
+```text
+AWS_REGION=<your-aws-region> (optional can also be provided in payload)
+AWS_ACCESS_KEY_ID=<your-aws-access-key-id> (optional, only needed when uploading to S3)
+AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key> (optional, only needed when uploading to S3)
+```
+
+Using an `.env` file is supported. Just rename `.env.example` to `.env` and insert your values.
+
+### FFmpeg
+
+FFmpeg is required to convert the input file/url to a file that can be uploaded to S3. You can download it from [here](https://www.ffmpeg.org/download.html).
 
 ## Installation / Usage
 
-Add clear instructions on how to use the project here
+Starting the service is as simple as running:
 
-## Development
+```bash
+npm install
+npm start
+```
 
-Add clear instructions on how to start development of the project here
+A docker image and docker-compose are also available:
 
--->
+```bash
+docker-compose up --build -d
+```
+
+The trim service is now up and running and available on port `8000`.
+
+### Endpoints
+
+Available endpoints are:
+
+| Endpoint      | Method   | Description                                     |
+| ------------- | -------- | ----------------------------------------------- |
+| `/`           | `GET`    | Heartbeat endpoint of service                   |
+| `/trim`       | `POST`   | Create a new trim job. Provide settings in body |
+| `/trim/jobId` | `GET`    | Get the status of a trim job                    |
+| `/trim/jobId` | `DELETE` | Cancel a trim job                               |
 
 ### Contributing
 

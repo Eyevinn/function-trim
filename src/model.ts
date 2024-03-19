@@ -1,5 +1,4 @@
 import { Static, Type } from '@sinclair/typebox';
-import { Readable } from 'stream';
 
 const StringEnum = <T extends string[]>(values: [...T]) =>
   Type.Unsafe<T[number]>({

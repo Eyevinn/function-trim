@@ -1,0 +1,20 @@
+version: '3.7'
+networks:
+  function-trim-internal:
+    driver: bridge
+
+services:
+  function-trim-api:
+    build:
+      context: .
+    image: function-trim
+    environment:
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ports:
+      - 8000:8000
+    expose:
+      - 8000
+    networks:
+      - function-trim-internal

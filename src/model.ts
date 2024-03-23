@@ -48,3 +48,10 @@ export const TrimJob = Type.Object({
   status: TrimJobStatus
 });
 export type TrimJob = Static<typeof TrimJob>;
+
+export type UploadToS3 = {
+  path: string;
+  bucket: string;
+  key: string;
+  region?: string;
+};

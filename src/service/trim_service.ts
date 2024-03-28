@@ -171,7 +171,10 @@ export default class TrimService {
     }
 
     this.outputFiles.push(
-      new URL(`${props.edl.name}.mp4`, outputUrl).toString()
+      new URL(
+        `${outputUrl.pathname}/${props.edl.name}.mp4`,
+        outputUrl
+      ).toString()
     );
     this.deleteAWSCache();
     this.state = 'completed';
@@ -252,7 +255,7 @@ export default class TrimService {
         return '';
       }
       return new URL(
-        `${props.edl.name}_${sourceIndex}.mp4`,
+        `${outputUrl.pathname}/${props.edl.name}_${sourceIndex}.mp4`,
         outputUrl
       ).toString();
     });

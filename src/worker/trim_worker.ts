@@ -40,14 +40,8 @@ export default class TrimWorker {
   }
 
   startJob(props: NewTrimJobRequest): string {
-    let service = this.trimServices.find(
-      (service) =>
-        !service.getState() || service.getState() !== TrimJobStatus.RUNNING
-    );
-    if (!service) {
-      service = new TrimService();
-      this.trimServices.push(service);
-    }
+    const service = new TrimService();
+    this.trimServices.push(service);
     service.trim(props);
     return service.getId();
   }

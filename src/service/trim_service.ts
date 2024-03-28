@@ -151,9 +151,9 @@ export default class TrimService {
       await uploadToS3({
         path: outputName,
         bucket: outputUrl.host,
-        key: `${outputUrl.pathname ? outputUrl.pathname + '/' : ''}${
-          props.edl.name
-        }.mp4`
+        key: `${
+          outputUrl.pathname ? outputUrl.pathname.replace(/^\/+/, '') + '/' : ''
+        }${props.edl.name}.mp4`
       });
     } catch (error) {
       console.error(error);
@@ -237,9 +237,11 @@ export default class TrimService {
         await uploadToS3({
           path: outputName,
           bucket: outputUrl.host,
-          key: `${outputUrl.pathname ? outputUrl.pathname + '/' : ''}${
-            props.edl.name
-          }_${sourceIndex}.mp4`
+          key: `${
+            outputUrl.pathname
+              ? outputUrl.pathname.replace(/^\/+/, '') + '/'
+              : ''
+          }${props.edl.name}_${sourceIndex}.mp4`
         });
       } catch (error) {
         console.error(error);

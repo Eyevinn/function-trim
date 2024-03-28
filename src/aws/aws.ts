@@ -69,6 +69,7 @@ export async function uploadToS3({
     client,
     params: { Bucket: bucket, Key: `${key}`, Body: stream }
   });
+  console.log(`Uploading to: bucket=${bucket}, key=${key}`);
   const round = (percent: number) => Math.round(percent * 100) / 100;
   upload.on('httpUploadProgress', (progress) => {
     const percent =
@@ -82,7 +83,7 @@ export async function uploadToS3({
     if (err) {
       console.error(err);
     } else {
-      fs.unlinkSync(path);
+      //fs.unlinkSync(path);
     }
   });
 }

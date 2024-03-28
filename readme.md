@@ -77,9 +77,7 @@ Request body for a single file:
 
 ```json
 {
-  "source": [
-    "s3://lab-testcontent-store/oscdemo/demo/1080.mp4"
-  ],
+  "source": ["s3://lab-testcontent-store/oscdemo/demo/1080.mp4"],
   "sourceType": "single",
   "outputDirectory": "s3://lab-testcontent-store/oscdemo",
   "edl": {

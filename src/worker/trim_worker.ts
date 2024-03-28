@@ -7,6 +7,7 @@ type TrimServices = TrimService[];
 export default class TrimWorker {
   private id: string;
   private trimServices: TrimServices = [];
+  private dataDir: string = process.env.DATA_DIR || '/data';
 
   constructor() {
     this.id = nanoid();
@@ -40,7 +41,7 @@ export default class TrimWorker {
   }
 
   startJob(props: NewTrimJobRequest): string {
-    const service = new TrimService();
+    const service = new TrimService(this.dataDir);
     this.trimServices.push(service);
     service.trim(props);
     return service.getId();

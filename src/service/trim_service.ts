@@ -17,12 +17,14 @@ export default class TrimService {
   private currentProcesses: ChildProcessWithoutNullStreams[];
   private currentJob: NewTrimJobRequest | undefined;
   private outputFiles: string[];
+  private dataDir: string;
 
-  constructor() {
+  constructor(dataDir: string) {
     this.id = nanoid();
     this.outputFiles = [];
     this.currentProcesses = [];
     this.state = 'pending';
+    this.dataDir = dataDir;
   }
 
   getId(): string {
@@ -50,19 +52,19 @@ export default class TrimService {
     }
   }
 
-  downloadS3File(url: string) {
-    if (!fs.existsSync(path.join(__dirname, S3_FOLDER))) {
-      fs.mkdirSync(path.join(__dirname, S3_FOLDER));
+  async downloadS3File(url: string) {
+    if (!fs.existsSync(path.join(this.dataDir, S3_FOLDER))) {
+      fs.mkdirSync(path.join(this.dataDir, S3_FOLDER));
     }
     if (!isS3URI(url)) return;
-    downloadFromS3(url);
+    await downloadFromS3(url, this.dataDir);
   }
 
   deleteAWSCache() {
     try {
-      const files = fs.readdirSync(path.join(__dirname, S3_FOLDER));
+      const files = fs.readdirSync(path.join(this.dataDir, S3_FOLDER));
       for (const file of files) {
-        fs.unlinkSync(path.join(__dirname, S3_FOLDER, file));
+        fs.unlinkSync(path.join(this.dataDir, S3_FOLDER, file));
       }
     } catch (error) {
       console.error(error);
@@ -113,12 +115,15 @@ export default class TrimService {
       })
       .join('');
 
-    const outputName = path.join(__dirname, `${props.edl.name}.mp4`);
+    const outputName = path.join(this.dataDir, `${props.edl.name}.mp4`);
     const process = spawn('ffmpeg', [
       ...props.source.flatMap((source) => {
         if (isS3URI(source)) {
-          const s3Key = getFileNameFromS3URL(source);
-          const localPath = path.join(__dirname, S3_FOLDER, s3Key);
+          const localPath = path.join(
+            this.dataDir,
+            S3_FOLDER,
+            path.parse(getFileNameFromS3URL(source)).base
+          );
           return ['-i', localPath];
         } else {
           return ['-i', source];
@@ -185,9 +190,9 @@ export default class TrimService {
 
   async trimABR(props: NewTrimJobRequest) {
     this.state = 'running';
-    await Promise.all(
-      props.source.map((source) => this.downloadS3File(source))
-    );
+    for (const source of props.source) {
+      await this.downloadS3File(source);
+    }
 
     const promises = props.source.map(async (source, sourceIndex) => {
       const filterComplex = props.edl.segments
@@ -202,16 +207,13 @@ export default class TrimService {
         })
         .join('');
 
+      const sourceFileName = path.parse(getFileNameFromS3URL(source)).base;
       const outputName = path.join(
-        __dirname,
-        `${props.edl.name}_${sourceIndex}.mp4`
+        this.dataDir,
+        `${props.edl.name}_${sourceFileName}`
       );
 
-      let localPath = source;
-      if (isS3URI(source)) {
-        const s3Key = getFileNameFromS3URL(source);
-        localPath = path.join(__dirname, S3_FOLDER, s3Key);
-      }
+      const localPath = path.join(this.dataDir, S3_FOLDER, sourceFileName);
       const process = spawn('ffmpeg', [
         '-i',
         localPath,
@@ -229,6 +231,9 @@ export default class TrimService {
       this.currentProcesses?.push(process);
       await new Promise((resolve, reject) => {
         process.on('close', resolve);
+        process.stderr.on('data', (data) => {
+          console.error(data.toString());
+        });
         process.on('error', reject);
       });
 
@@ -241,7 +246,7 @@ export default class TrimService {
             outputUrl.pathname
               ? outputUrl.pathname.replace(/^\/+/, '') + '/'
               : ''
-          }${props.edl.name}_${sourceIndex}.mp4`
+          }${props.edl.name}/${sourceFileName}`
         });
       } catch (error) {
         console.error(error);
@@ -261,7 +266,7 @@ export default class TrimService {
         return '';
       }
       return new URL(
-        `${outputUrl.pathname}/${props.edl.name}_${sourceIndex}.mp4`,
+        `${outputUrl.pathname}/${props.edl.name}_${sourceFileName}`,
         outputUrl
       ).toString();
     });

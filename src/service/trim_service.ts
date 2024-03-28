@@ -146,10 +146,11 @@ export default class TrimService {
       process.on('error', reject);
     });
 
+    const outputUrl = new URL(props.outputDirectory);
     try {
       await uploadToS3({
         path: outputName,
-        bucket: props.outputDirectory,
+        bucket: outputUrl.host + outputUrl.pathname,
         key: `${props.edl.name}.mp4`
       });
     } catch (error) {
@@ -169,7 +170,9 @@ export default class TrimService {
       return [];
     }
 
-    this.outputFiles.push(`s3://${props.outputDirectory}/${outputName}`);
+    this.outputFiles.push(
+      new URL(`${props.edl.name}.mp4`, outputUrl).toString()
+    );
     this.deleteAWSCache();
     this.state = 'completed';
     return this.outputFiles;
@@ -224,10 +227,11 @@ export default class TrimService {
         process.on('error', reject);
       });
 
+      const outputUrl = new URL(props.outputDirectory);
       try {
         await uploadToS3({
           path: outputName,
-          bucket: props.outputDirectory,
+          bucket: outputUrl.host + outputUrl.pathname,
           key: `${props.edl.name}_${sourceIndex}.mp4`
         });
       } catch (error) {
@@ -247,7 +251,10 @@ export default class TrimService {
         this.deleteAWSCache();
         return '';
       }
-      return `s3://${props.outputDirectory}/${outputName}`;
+      return new URL(
+        `${props.edl.name}_${sourceIndex}.mp4`,
+        outputUrl
+      ).toString();
     });
     const s3Urls = await Promise.allSettled(promises);
     const fulfilledUrls = s3Urls

@@ -5,6 +5,8 @@ ENV NODE_ENV=production
 EXPOSE 8000
 RUN mkdir /app
 RUN chown node:node /app
+RUN mkdir /data
+RUN chown node:node /data
 USER node
 WORKDIR /app
 COPY --chown=node:node ["package.json", "package-lock.json*", "tsconfig*.json", "./"]
@@ -17,4 +19,5 @@ RUN apk update && \
     apk upgrade && \
     apk add ffmpeg
 COPY . .
+ENV DATA_DIR=/data
 CMD [ "npm", "run", "start" ]

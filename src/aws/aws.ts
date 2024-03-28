@@ -30,14 +30,18 @@ function saveStreamToFile(stream: Readable, filePath: string): Promise<void> {
 }
 
 export function getFileNameFromS3URL(S3url: string): string {
-  return S3url.split('/')[3];
+  return new URL(S3url).pathname.replace(/^\/+/, '');
 }
 
 export function getBucketFromS3URL(S3url: string): string {
-  return S3url.split('/')[2];
+  return new URL(S3url).hostname;
 }
 
-export async function downloadFromS3(S3url: string, destination?: string) {
+export async function downloadFromS3(
+  S3url: string,
+  dataDir: string,
+  destination?: string
+) {
   if (!process.env.AWS_REGION) {
     throw new Error('AWS_REGION is not set');
   }
@@ -48,11 +52,14 @@ export async function downloadFromS3(S3url: string, destination?: string) {
   });
 
   const localDest = path.join(
-    __dirname,
-    `${S3_FOLDER}/${getFileNameFromS3URL(S3url)}`
+    dataDir,
+    `${S3_FOLDER}/${path.parse(getFileNameFromS3URL(S3url)).base}`
   );
   const responseStream = await s3Client.send(getCommand);
-  saveStreamToFile(responseStream.Body as Readable, destination || localDest);
+  await saveStreamToFile(
+    responseStream.Body as Readable,
+    destination || localDest
+  );
 }
 
 export async function uploadToS3({

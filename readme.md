@@ -46,6 +46,54 @@ Available endpoints are:
 | `/trim/jobId` | `GET`    | Get the status of a trim job                    |
 | `/trim/jobId` | `DELETE` | Cancel a trim job                               |
 
+### Examples
+
+Request body to trim a bundle of ABR files available on an S3 bucket and upload the result to an S3 bucket.
+
+```json
+{
+  "source": [
+    "s3://lab-testcontent-store/oscdemo/demo/240.mp4",
+    "s3://lab-testcontent-store/oscdemo/demo/360.mp4",
+    "s3://lab-testcontent-store/oscdemo/demo/480.mp4",
+    "s3://lab-testcontent-store/oscdemo/demo/720.mp4",
+    "s3://lab-testcontent-store/oscdemo/demo/1080.mp4"
+  ],
+  "sourceType": "abr",
+  "outputDirectory": "s3://lab-testcontent-store/oscdemo",
+  "edl": {
+    "name": "reel-demo1",
+    "segments": [
+      {
+        "start": 10,
+        "end": 20
+      }
+    ]
+  }
+}
+```
+
+Request body for a single file:
+
+```json
+{
+  "source": [
+    "s3://lab-testcontent-store/oscdemo/demo/1080.mp4"
+  ],
+  "sourceType": "single",
+  "outputDirectory": "s3://lab-testcontent-store/oscdemo",
+  "edl": {
+    "name": "reel-demo2",
+    "segments": [
+      {
+        "start": 10,
+        "end": 20
+      }
+    ]
+  }
+}
+```
+
 ### Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md)

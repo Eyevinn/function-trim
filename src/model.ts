@@ -24,7 +24,9 @@ export type EDL = Static<typeof EDL>;
 export const NewTrimJobRequest = Type.Object({
   source: Type.Array(Type.String({ description: 'URL to source file' })),
   sourceType: SourceType,
-  outputDirectory: Type.String({ description: 'Path to output directory' }),
+  outputDirectory: Type.String({
+    description: 'S3 URL or path for the output'
+  }),
   edl: EDL
 });
 export type NewTrimJobRequest = Static<typeof NewTrimJobRequest>;
